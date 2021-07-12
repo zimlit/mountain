@@ -18,6 +18,6 @@ compiler.o: compiler.h scanner.h object.h common.h vm.h compiler.c
 
 scanner.o: scanner.h scanner.c
 
-object.o: object.h value.h common.h vm.h memory.h table.h object.c
+object.o: object.h chunk.h value.h common.h vm.h memory.h table.h object.c
 
 table.o: common.h value.h table.h memory.h object.h table.c
