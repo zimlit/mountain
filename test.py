@@ -1,6 +1,10 @@
+import time
+
 def fib(n):
     if n < 2:
         return n
     return fib(n - 2) + fib(n - 1)
 
-print(fib(15))
+start = time.time()
+print(fib(20))
+print(time.time() - start)

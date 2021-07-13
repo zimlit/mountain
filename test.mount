@@ -1,8 +1,17 @@
-fn fib(n)
-  if (n < 2) return n end
-  fib(n - 2) + fib(n -1)
-end
+fn x()
+  let x = 0
+  while (x < 2000) 
+   let y = "stre"
+   print y
+   x = x + 1
+  end
+   end
 
-let start = clock()
-print fib(20)
-print clock() - start
+x()
+print 22
+print "str"
+
+fn y()
+end
+fn z()
+end
