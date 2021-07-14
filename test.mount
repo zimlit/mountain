@@ -1,17 +1,16 @@
-fn x()
-  let x = 0
-  while (x < 2000) 
-   let y = "stre"
-   print y
-   x = x + 1
-  end
-   end
 
-x()
-print 22
-print "str"
+class B end
+class C
+      fn x()
+      	 print "xx"
+	 end
+end
 
-fn y()
+class D < B, C
+      fn x() 
+      	 print super[0]
+	 end
 end
-fn z()
-end
+
+let x = D()
+x.x()

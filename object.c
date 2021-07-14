@@ -63,6 +63,43 @@ ObjUpvalue* newUpvalue(Value* slot) {
   return upvalue;
 }
 
+ObjClass* newClass(ObjString* name) {
+  ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
+  klass->name = name; 
+  initTable(&klass->methods);
+  klass->superCount = 0;
+  
+  return klass;
+}
+
+ObjArray* newArray() {
+  ObjArray* array = ALLOCATE_OBJ(ObjArray, OBJ_ARRAY);
+
+  initValueArray(&array->values);
+  array->values.values = NULL;
+}
+
+void pushArray(ObjArray* array, Value val) {
+  writeValueArray(&array->values, val);
+}
+  
+
+ObjInstance* newInstance(ObjClass* klass) {
+  ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, OBJ_INSTANCE);
+  instance->klass = klass;
+  initTable(&instance->fields);
+  return instance;
+}
+
+ObjBoundMethod* newBoundMethod(Value receiver,
+                               ObjClosure* method) {
+  ObjBoundMethod* bound = ALLOCATE_OBJ(ObjBoundMethod,
+                                       OBJ_BOUND_METHOD);
+  bound->receiver = receiver;
+  bound->method = method;
+  return bound;
+}
+
 static ObjString* allocateString(char* chars, int length,
                                  uint32_t hash) {
   ObjString* string = ALLOCATE_OBJ(ObjString, OBJ_STRING);
@@ -117,6 +154,16 @@ static void printFunction(ObjFunction* function) {
   printf("<fn %s>", function->name->chars);
 }
 
+
+bool addSuper(ObjClass* subclass, ObjClass* superclass) {
+  if (subclass->superCount == 256) {
+    return false;
+  }
+  subclass->supers[subclass->superCount] = superclass;
+  subclass->superCount++;
+  return true;
+}
+
 void printObject(Value value) {
   switch (OBJ_TYPE(value)) {
     case OBJ_FUNCTION:
@@ -134,5 +181,28 @@ void printObject(Value value) {
     case OBJ_UPVALUE:
       printf("upvalue");
       break;
+    case OBJ_CLASS:
+      printf("%s", AS_CLASS(value)->name->chars);
+      break;
+    case OBJ_INSTANCE:
+      printf("%s instance",
+             AS_INSTANCE(value)->klass->name->chars);
+      break;
+    case OBJ_BOUND_METHOD:
+      printFunction(AS_BOUND_METHOD(value)->method->function);
+      break;
+  case OBJ_ARRAY: {
+    printf("[");
+    for (int i = 0; i < (AS_ARRAY(value))->values.count - 1; i++) {
+      printValue((AS_ARRAY(value))->values.values[i]);
+      printf(", ");
+    }
+
+
+    printValue((AS_ARRAY(value))->values.values[AS_ARRAY(value)->values.count - 1]);
+
+    printf("]");
+    break;
+  }
   }
 }

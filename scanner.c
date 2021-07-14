@@ -192,6 +192,8 @@ Token scanToken() {
   switch (c) {
     case '(': return makeToken(TOKEN_LEFT_PAREN);
     case ')': return makeToken(TOKEN_RIGHT_PAREN);
+    case '[': return makeToken(TOKEN_LEFT_BRACKET);
+    case ']': return makeToken(TOKEN_RIGHT_BRACKET);
     case ',': return makeToken(TOKEN_COMMA);
     case '.': return makeToken(TOKEN_DOT);
     case '-': return makeToken(TOKEN_MINUS);

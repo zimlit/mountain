@@ -6,8 +6,10 @@
 #ifdef DEBUG_LOG_GC
 #include <stdio.h>
 #include "debug.h"
-#include "compiler.h"
 #endif
+
+
+#include "compiler.h"
 
 #define GC_HEAP_GROW_FACTOR 2
 
@@ -90,6 +92,30 @@ static void blackenObject(Obj* object) {
       markArray(&function->chunk.constants);
       break;
     }
+    case OBJ_CLASS: {
+      ObjClass* klass = (ObjClass*)object;
+      markObject((Obj*)klass->name);
+      markTable(&klass->methods);
+      break;
+    }
+
+    case OBJ_INSTANCE: {
+      ObjInstance* instance = (ObjInstance*)object;
+      markObject((Obj*)instance->klass);
+      markTable(&instance->fields);
+      break;
+    }
+  case OBJ_ARRAY: {
+    ObjArray* arr = (ObjArray*)object;
+    markArray(&arr->values);
+    break;
+  }
+    case OBJ_BOUND_METHOD: {
+      ObjBoundMethod* bound = (ObjBoundMethod*)object;
+      markValue(bound->receiver);
+      markObject((Obj*)bound->method);
+      break;
+    }
     case OBJ_NATIVE:
     case OBJ_STRING:
       break;
@@ -108,6 +134,9 @@ static void freeObject(Obj* object) {
       FREE(ObjString, object);
       break;
     }
+    case OBJ_BOUND_METHOD:
+      FREE(ObjBoundMethod, object);
+      break;
     case OBJ_FUNCTION: {
       ObjFunction* function = (ObjFunction*)object;
       freeChunk(&function->chunk);
@@ -124,9 +153,22 @@ static void freeObject(Obj* object) {
       FREE(ObjClosure, object);
       break;
     }
+    case OBJ_CLASS: {
+      ObjClass* klass = (ObjClass*)object;
+      freeTable(&klass->methods);
+      FREE(ObjClass, object);
+      break;
+    } 
     case OBJ_UPVALUE:
       FREE(ObjUpvalue, object);
       break;
+    case OBJ_INSTANCE: {
+      ObjInstance* instance = (ObjInstance*)object;
+      freeTable(&instance->fields);
+      FREE(ObjInstance, object);
+      break;
+    }
+      
   }
 }
 
@@ -148,6 +190,7 @@ static void markRoots() {
 
   markTable(&vm.globals);
   markCompilerRoots();
+  markObject((Obj*)vm.initString);
 }
 
 static void traceReferences() {
